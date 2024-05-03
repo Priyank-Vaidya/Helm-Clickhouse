@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: clickhouse-test
+spec:
+  containers:
+    - name: clickhouse-test
+      image: yandex/clickhouse-client:21.8
+      command: ["/bin/sh"]
+      args:
+        - "-c"
+        - |
+          clickhouse-client --host clickhouse --query "CREATE TABLE dz_test (B Int64, T String, D Date) ENGINE = MergeTree PARTITION BY D ORDER BY B;"
+          clickhouse-client --host clickhouse --query "INSERT INTO dz_test SELECT number, number, '2023-01-01' FROM numbers(1e9);"
+          clickhouse-client --host clickhouse --query "SELECT table, partition, formatReadableSize(sum(bytes)) AS size FROM system.parts WHERE active GROUP BY table, partition ORDER BY table, partition;"
+      env:
+        - name: CLICKHOUSE_HOST
+          value: clickhouse
+  restartPolicy: Never

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{"clickhouse.fullname" }}
+spec:
+  accessModes:
+    - {{.Values.clickhouse.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{.Values.clickhouse.persistence.size }}
+  storageClassName: {{.Values.clickhouse.persistence.storageClass }}

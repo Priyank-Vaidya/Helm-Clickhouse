@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clickhouse.fullname" . | nindent 9 }}  # Corrected indentation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "clickhouse.name" . | nindent 9}}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "clickhouse.name" . | nindent 12 }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ include "clickhouse.name" . | nindent 12}}
+        image: "{{ .Values.clickhouse.image.repository }}:{{ .Values.clickhouse.image.tag }}"
+        imagePullPolicy: {{ .Values.clickhouse.image.pullPolicy }}
+        ports:
+        - name: clickhouse
+          containerPort: {{ .Values.clickhouse.service.port }}
+          protocol: TCP
+        volumeMounts:
+        - name: clickhouse-data
+          mountPath: /var/lib/clickhouse
+        resources:
+          {{ .Values.clickhouse.resources | toYaml | nindent 12 }}
+      volumes:
+      - name: clickhouse-data
+        persistentVolumeClaim:
+          claimName: "clickhouse"  # Corrected claim name
